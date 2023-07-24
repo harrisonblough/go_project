@@ -28,7 +28,7 @@ func main() {
 
 }
 
-const tableName = "LambdaInGoUser"
+const tableName = "go_project"
 
 func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error){
 		switch req.HTTPMethod{
