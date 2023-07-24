@@ -25,9 +25,9 @@ var(
 
 
 type User struct{
-	Email string `json:"email"`
-	FirstName string `json:"firstName"`
-	LastName string `json:"lastName"`
+	Email 		string	`json:"email"`
+	FirstName	string 	`json:"firstName"`
+	LastName	string 	`json:"lastName"`
 }
 
 func FetchUser(email, tableName string, dynaClient dynamodbiface.DynamoDBAPI)(*User, error){
@@ -71,22 +71,22 @@ func FetchUsers(tableName string, dynaClient dynamodbiface.DynamoDBAPI)(*[]User,
 
 func CreateUser(req events.APIGatewayProxyRequest, tableName string, dynaClient dynamodbiface.DynamoDBAPI)(*User, error){
 	var u User
-	if err := json.Unmarshal([]byte(req.Body), &u); err != nil{
+	err := json.Unmarshal([]byte(req.Body), &u)
+	if err!=nil {
 		return nil, errors.New(ErrorInvalidUserData)
 	}
-
 	if !validators.IsEmailValid(u.Email){
 		return nil, errors.New(ErrorInvalidEmail)
 	}
 
-	currentUser,err := FetchUser(u.Email, tableName, dynaClient)
-	if currentUser!=nil && len(currentUser.Email) != 0{
+	currentUser, _ := FetchUser(u.Email, tableName, dynaClient)
+	if currentUser != nil && len(currentUser.Email) != 0 {
 		return nil, errors.New(ErrorUserAlreadyExists)
 	}
 
 	av, err := dynamodbattribute.MarshalMap(u)
 
-	if err!=nil{
+	if err != nil {
 		return nil, errors.New(ErrorCouldNotMarshalItem)
 	}
 
@@ -95,12 +95,10 @@ func CreateUser(req events.APIGatewayProxyRequest, tableName string, dynaClient 
 		TableName: aws.String(tableName),
 	}
 
-	_,err = dynaClient.PutItem(input)
-
-	if err!=nil{
+	_, err = dynaClient.PutItem(input)
+	if err != nil {
 		return nil, errors.New(ErrorCouldNotDynamoPutItem)
 	}
-
 	return &u, nil
 
 }
